@@ -40,15 +40,9 @@ class Todo extends React.Component {
   handleDeleteBtnClick( event ) {
     var id = event.target.value;
     this.setState( function( prevState ) {
-      var todos = prevState.todos;
-      var index = null;
-      for( var x = 0; x < todos.length; x ++ ) {
-        if ( todos[ x ].id === id ) {
-          index = x;
-          break;
-        }
-      }
-      todos = todos.slice( 0, index ).concat( todos.slice( index + 1 ));
+      var todos = prevState.todos.filter( todo => {
+        return ( todo.id !== id );
+      })
       return {
         todos: todos
       }
@@ -58,13 +52,10 @@ class Todo extends React.Component {
     var id = event.target.value;
     this.setState( function( prevState ) {
       var todos = prevState.todos;
-      var index = null;
-      for( var x = 0; x < todos.length; x ++ ) {
-        if ( todos[ x ].id === id ) {
-          index = x;
-          break;
-        }
-      }
+      var index = todos.findIndex( todo => {
+        return todo.id === id;
+      });
+      
       todos = (
         todos.slice(0, index)
           .concat([{
@@ -81,7 +72,6 @@ class Todo extends React.Component {
   }
   handleFilterChange( event, currentFilter ) {
     event.preventDefault();
-    console.log( currentFilter );
     this.setState( function() {
       return {
         currentFilter: currentFilter
@@ -90,25 +80,18 @@ class Todo extends React.Component {
   }
   filterTodos() {
     var todos = this.state.todos;
-
     var currentFilter = this.state.currentFilter;
-
-    var filteredTodos = [];
-
     var searchTerm = this.state.searchTerm;
-    for ( var x = 0; x < todos.length; x ++ ){
-      var todoItem = todos[ x ];
-      if ( todoItem.todo.indexOf( searchTerm ) === -1 ) {
-        continue;
-      }
-      if( currentFilter === COMPLETED && !todoItem.completed ) {
-        continue;
-      }
-      else if ( currentFilter === ACTIVE && todoItem.completed ) {
-        continue;
-      }
-      filteredTodos.push( todoItem );
-    }
+
+    var filteredTodos = todos.filter( todoItem => {
+      if( ( todoItem.todo.indexOf( searchTerm ) === -1 ) ||
+          ( currentFilter === COMPLETED && !todoItem.completed ) ||
+          ( currentFilter === ACTIVE && todoItem.completed )){
+            return false;
+          }
+          return true;
+    })
+
     return filteredTodos;
   }
   handleTodoSearch( searchTerm ) {
